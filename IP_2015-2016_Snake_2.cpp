@@ -1,7 +1,7 @@
 /*
 English (Romanian below):
 
-Snake-like Game - 1st Release
+Snake-like Game - 2nd Release
 Programmed in December 2015 - January 2016 by Lucian-Jan Filimon for the "Alexandru Ioan Cuza" University of Iasi - Faculty of Computer Science (Project for "Introduction in programming", professors" Corina Forascu, Alexandru Citea).
 
 1st release features:
@@ -12,9 +12,15 @@ Programmed in December 2015 - January 2016 by Lucian-Jan Filimon for the "Alexan
 -Food which increases the size of the snake with one unit.
 -The game is shown as ASCII art on console
 
+Improvements in the 2nd release:
+-The creation of a proper scoreboard, displayed permanently in the upper right corner of the screen
+-Introduction of a new type of food, which appears when the size of the snake is divided exactly by 5 and whose role is to increase the speed of the snake.
+-Showing a border around the game board
+-Increase of the size of the game board
+
 Romana
 
-Joc tip Snake - versiunea 1
+Joc tip Snake - versiunea 2
 Programat in Decembrie 2015 de Lucian-Jan Filimon pentru Universitatea "Alexandru Ioan Cuza" din Iasi - Facultatea de Informatica(Proiect pentru obiectul "Introducere in programare", profesori: Corina Forascu, Alexandru Citea).
 
 Versiunea 1 contine urmatoarele insusiri:
@@ -24,18 +30,24 @@ Versiunea 1 contine urmatoarele insusiri:
 -Un indicator de score afisat in permanenta
 -"Mancarea" ce creste dimensiunea sarpelui cu o unitate.
 -Un afisaj de tip ASCII art pe consola.
+
+Imbunatatiri aduse in versiunea 2:
+-Crearea unui veritabil scoreboard, afisat in permanenta in partea dreapta sus a ecranului
+-Adaugarea unui nou tip de mancare, ce apare atunci cand dimensiunea sarpelui se imparte exact la 5, si a carui rol este de a creste viteza sarpelui
+-Crearea unei "rame" in jurul spatiului de joc
+-Marirea spatiului de joc
 */
 
 #include <iostream>
 #include <cstdlib>
-#include <conio.h>
 #include <ctime>
+#include <conio.h>
 #include <windows.h>
 
 using namespace std;
 
-#define boardSizeX 10
-#define boardSizeY 20
+#define boardSizeX 25
+#define boardSizeY 50
 
 char gameBoard[boardSizeX][boardSizeY];
 bool canContinue=true;
@@ -49,7 +61,7 @@ struct Snake{
 struct Food{
     int posX;
     int posY;
-}food;
+}food,speedFood;
 int difficultyLevel;
 
 void moveSnake(){
@@ -78,7 +90,7 @@ void initialiseSnake(){
     snake.posX[2]=snake.posX[1]-1;
     snake.posY[2]=snake.posY[1];}
 
-void newFood(){
+void newFood(Food &food){
     food.posX=rand()%boardSizeX;
     food.posY=rand()%boardSizeY;
     }
@@ -118,7 +130,15 @@ void newTurn(){
             snake.posX[snake.size]=snake.posX[snake.size-1];
             snake.posY[snake.size]=snake.posY[snake.size-1];
             snake.size++;
-            newFood();
+            newFood(food);
+            if (snake.size%5==0){
+                newFood(speedFood);
+            }
+        }
+        if((snake.posX[0]==speedFood.posX)&&(snake.posY[0]==speedFood.posY)){
+            difficultyLevel/=2;
+            speedFood.posX=boardSizeX+1;
+            speedFood.posY=boardSizeY+1;
         }
 }
 
@@ -145,12 +165,17 @@ void showBoard(){
     for(i=0;i<snake.size;i++){
        gameBoard[snake.posX[i]][snake.posY[i]]='0';}
     gameBoard[food.posX][food.posY]='*';
+    gameBoard[speedFood.posX][speedFood.posY]='$';
     clearScreen();
-    for(i=0;i<boardSizeX;i++){
-    for(j=0;j<boardSizeY;j++)
-    cout<<gameBoard[i][j];
-    cout<<endl;}
-    cout<<"Scor curent: "<<snake.size-3;
+    for(i=0;i<boardSizeY+15;i++){cout<<'_';}cout<<endl<<'|';
+    for(j=0;j<boardSizeY;j++){cout<<gameBoard[0][j];}cout<<'|'<<" Scor curent "<<"\n|";
+    for(j=0;j<boardSizeY;j++){cout<<gameBoard[1][j];}cout<<'|'<<"       "<<snake.size-3<<"\n|";
+    for(j=0;j<boardSizeY;j++){cout<<gameBoard[2][j];}cout<<'|';for(i=1;i<14;i++){cout<<'T';}cout<<endl;
+    for(i=3;i<boardSizeX;i++){cout<<'|';
+    for(j=0;j<boardSizeY;j++){
+    cout<<gameBoard[i][j];}
+    cout<<'|'<<endl;}
+    for(i=0;i<boardSizeY+2;i++){cout<<'T';}cout<<endl;
     }
 
 void startGame(){
@@ -202,7 +227,9 @@ void game(){
 int main()
 {   startGame();
     initialiseSnake();
-    newFood();
+    newFood(food);
+    speedFood.posX=boardSizeX+1;
+    speedFood.posY=boardSizeY+1;
     game();
     return 0;
 }
