@@ -1,7 +1,7 @@
 /*
 English (Romanian below):
 
-Snake-like Game - 2nd Release
+Snake-like Game - 3rd Release
 Programmed in December 2015 - January 2016 by Lucian-Jan Filimon for the "Alexandru Ioan Cuza" University of Iasi - Faculty of Computer Science (Project for "Introduction in programming", professors" Corina Forascu, Alexandru Citea).
 
 1st release features:
@@ -18,10 +18,14 @@ Improvements in the 2nd release:
 -Showing a border around the game board
 -Increase of the size of the game board
 
+Improvements in the 3rd release:
+-Fixing movement errors (now the snake does not stop when the gamer attempts to reverse the direction of the snake and, more importantly, does not eat itself when the attempt is made at the border of the game board)
+-Addition of sound effects
+
 Romana
 
-Joc tip Snake - versiunea 2
-Programat in Decembrie 2015 de Lucian-Jan Filimon pentru Universitatea "Alexandru Ioan Cuza" din Iasi - Facultatea de Informatica(Proiect pentru obiectul "Introducere in programare", profesori: Corina Forascu, Alexandru Citea).
+Joc tip Snake - versiunea 3
+Programat in Decembrie 2015 - Ianuarie 2016 de Lucian-Jan Filimon pentru Universitatea "Alexandru Ioan Cuza" din Iasi - Facultatea de Informatica(Proiect pentru obiectul "Introducere in programare", profesori: Corina Forascu, Alexandru Citea).
 
 Versiunea 1 contine urmatoarele insusiri:
 -Un ecran de start, prin care jucatorii pot alege un nivel de dificultate
@@ -36,6 +40,10 @@ Imbunatatiri aduse in versiunea 2:
 -Adaugarea unui nou tip de mancare, ce apare atunci cand dimensiunea sarpelui se imparte exact la 5, si a carui rol este de a creste viteza sarpelui
 -Crearea unei "rame" in jurul spatiului de joc
 -Marirea spatiului de joc
+
+Imbunatatiri aduse in versiunea 3:
+-Corectarea erorilor de miscare (acum sarpele nu se mai opreste atunci cand dorim sa-l intoracem, si, mai ales, nu se mananca singur atunci cand vrem sa-l intoarcem la marginea spatiului de joc)
+-Adaugarea de efecte sonore
 */
 
 #include <iostream>
@@ -102,40 +110,88 @@ void initaliseBoard(){
         gameBoard[i][j]=' ';
     }
 
+void checkEdges(){
+    if(snake.posX[0]==-1){snake.posX[0]=boardSizeX-1;}
+    if(snake.posX[0]==boardSizeX){snake.posX[0]=0;}
+    if(snake.posY[0]==-1){snake.posY[0]=boardSizeY-1;}
+    if(snake.posY[0]==boardSizeY){snake.posY[0]=0;}
+}
+
 void newTurn(){
-    switch(snake.direction){
-    case 0:
-        if(!(snake.posX[0]-1==snake.posX[1])){
-            moveSnake();snake.posX[0]--;
-            snake.pdirection=snake.direction;
-        }else{snake.direction=snake.pdirection;}break;
-    case 1:
-        if(!(snake.posX[0]+1==snake.posX[1])){
-            moveSnake();snake.posX[0]++;
-            snake.pdirection=snake.direction;
-        }else{snake.direction=snake.pdirection;}break;
-    case 2:
-        if(!(snake.posY[0]-1==snake.posY[1])){
-            moveSnake();snake.posY[0]--;
-            snake.pdirection=snake.direction;
-        }else{snake.direction=snake.pdirection;}break;
-    case 3:
-        if(!(snake.posY[0]+1==snake.posY[1])){
-            moveSnake();snake.posY[0]++;
-            snake.pdirection=snake.direction;
-        }else{snake.direction=snake.pdirection;}break;
-    default:break;
+    switch(snake.direction) {
+  case 0:
+    if (snake.posX[0]==0&&snake.pdirection!=0) {
+      snake.direction=snake.pdirection;
+      newTurn();
     }
+    if (!(snake.posX[0]-1==snake.posX[1])) {
+      moveSnake();
+      snake.posX[0]--;
+      snake.pdirection=snake.direction;
+    } else {
+      snake.direction=snake.pdirection;
+      newTurn();
+    }
+    break;
+  case 1:
+    if (snake.posX[0]==(boardSizeX-1)&&snake.pdirection!=1) {
+      snake.direction=snake.pdirection;
+      newTurn();
+    }
+    if (!(snake.posX[0]+1==snake.posX[1])) {
+      moveSnake();
+      snake.posX[0]++;
+      snake.pdirection=snake.direction;
+    } else {
+      snake.direction=snake.pdirection;
+      newTurn();
+    }
+    break;
+  case 2:
+    if (snake.posY[0]==0&&snake.pdirection!=2) {
+      snake.direction=snake.pdirection;
+      newTurn();
+    }
+    if (!(snake.posY[0]-1==snake.posY[1])) {
+      moveSnake();
+      snake.posY[0]--;
+      snake.pdirection=snake.direction;
+    } else {
+      snake.direction=snake.pdirection;
+      newTurn();
+    }
+    break;
+  case 3:
+    if (snake.posY[0]==(boardSizeY-1)&&snake.pdirection!=3) {
+      snake.direction=snake.pdirection;
+      newTurn();
+    }
+
+    if (!(snake.posY[0]+1==snake.posY[1])) {
+      moveSnake();
+      snake.posY[0]++;
+      snake.pdirection=snake.direction;
+    } else {
+      snake.direction=snake.pdirection;
+      newTurn();
+    }
+    break;
+  default:break;
+  }
+  checkEdges();
         if((snake.posX[0]==food.posX)&&(snake.posY[0]==food.posY)){
             snake.posX[snake.size]=snake.posX[snake.size-1];
             snake.posY[snake.size]=snake.posY[snake.size-1];
             snake.size++;
+            Beep(880,200);
             newFood(food);
             if (snake.size%5==0){
                 newFood(speedFood);
             }
         }
         if((snake.posX[0]==speedFood.posX)&&(snake.posY[0]==speedFood.posY)){
+            Beep(800,200);
+            Beep(1319,200);
             difficultyLevel/=2;
             speedFood.posX=boardSizeX+1;
             speedFood.posY=boardSizeY+1;
@@ -151,17 +207,9 @@ bool snakeCollides(){
 }
 return false;}
 
-void checkEdges(){
-    if(snake.posX[0]==-1){snake.posX[0]=boardSizeX-1;}
-    if(snake.posX[0]==boardSizeX){snake.posX[0]=0;}
-    if(snake.posY[0]==-1){snake.posY[0]=boardSizeY-1;}
-    if(snake.posY[0]==boardSizeY){snake.posY[0]=0;}
-}
-
 void showBoard(){
     int i,j;
     initaliseBoard();
-    checkEdges();
     for(i=0;i<snake.size;i++){
        gameBoard[snake.posX[i]][snake.posY[i]]='0';}
     gameBoard[food.posX][food.posY]='*';
