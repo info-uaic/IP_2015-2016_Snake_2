@@ -1,7 +1,7 @@
 # IP_2015-2016_Snake_2
 English (Romanian below):
 
-Programmed in December 2015 - January 2016 by Lucian-Jan Filimon for the "Alexandru Ioan Cuza" University of Iasi - Faculty of Computer Science (Project for "Introduction in programming", professors" Corina Forascu, Alexandru Citea).
+Programmed in December 2015 - January 2016 by Lucian-Jan Filimon for the "Alexandru Ioan Cuza" University of Iași - Faculty of Computer Science (Project for "Introduction in programming", professors" Corina Forăscu, Alexandru Cîtea).
 
 1st release features:
 
