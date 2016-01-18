@@ -1,7 +1,7 @@
 /*
 English (Romanian below):
 
-Snake-like Game - 3rd Release
+Snake-like Game - 4th Release
 Programmed in December 2015 - January 2016 by Lucian-Jan Filimon for the "Alexandru Ioan Cuza" University of Iasi - Faculty of Computer Science (Project for "Introduction in programming", professors" Corina Forascu, Alexandru Citea).
 
 1st release features:
@@ -22,9 +22,13 @@ Improvements in the 3rd release:
 -Fixing movement errors (now the snake does not stop when the gamer attempts to reverse the direction of the snake and, more importantly, does not eat itself when the attempt is made at the border of the game board)
 -Addition of sound effects
 
+Improvements in the 4th release:
+-The newTurn function has been rewritten
+-Addition of a new type of food, which appears when the size of the snake is divided exactly by 6 and whose role is to decrease the speed of the snake.
+
 Romana
 
-Joc tip Snake - versiunea 3
+Joc tip Snake - versiunea 4
 Programat in Decembrie 2015 - Ianuarie 2016 de Lucian-Jan Filimon pentru Universitatea "Alexandru Ioan Cuza" din Iasi - Facultatea de Informatica(Proiect pentru obiectul "Introducere in programare", profesori: Corina Forascu, Alexandru Citea).
 
 Versiunea 1 contine urmatoarele insusiri:
@@ -44,6 +48,10 @@ Imbunatatiri aduse in versiunea 2:
 Imbunatatiri aduse in versiunea 3:
 -Corectarea erorilor de miscare (acum sarpele nu se mai opreste atunci cand dorim sa-l intoracem, si, mai ales, nu se mananca singur atunci cand vrem sa-l intoarcem la marginea spatiului de joc)
 -Adaugarea de efecte sonore
+
+Imbunatatiri aduse in versiunea 4:
+-Refacerea functiei newTurn
+-Adaugarea unui nou tip de mancare, ce apare atunci cand dimensiunea sarpelui se imparte exact la 6, si a carui rol este de a scade viteza sarpelui
 */
 
 #include <iostream>
@@ -54,8 +62,8 @@ Imbunatatiri aduse in versiunea 3:
 
 using namespace std;
 
-#define boardSizeX 25
-#define boardSizeY 50
+#define boardSizeX 12
+#define boardSizeY 24
 
 char gameBoard[boardSizeX][boardSizeY];
 bool canContinue=true;
@@ -69,7 +77,7 @@ struct Snake{
 struct Food{
     int posX;
     int posY;
-}food,speedFood;
+}food,speedFood,slowFood;
 int difficultyLevel;
 
 void moveSnake(){
@@ -120,61 +128,40 @@ void checkEdges(){
 void newTurn(){
     switch(snake.direction) {
   case 0:
-    if (snake.posX[0]==0&&snake.pdirection!=0) {
+    if (snake.pdirection==1) {
       snake.direction=snake.pdirection;
       newTurn();
-    }
-    if (!(snake.posX[0]-1==snake.posX[1])) {
+    }else{
       moveSnake();
       snake.posX[0]--;
-      snake.pdirection=snake.direction;
-    } else {
-      snake.direction=snake.pdirection;
-      newTurn();
-    }
+      snake.pdirection=snake.direction;}
     break;
   case 1:
-    if (snake.posX[0]==(boardSizeX-1)&&snake.pdirection!=1) {
+    if (snake.pdirection==0) {
       snake.direction=snake.pdirection;
       newTurn();
-    }
-    if (!(snake.posX[0]+1==snake.posX[1])) {
+    }else{
       moveSnake();
       snake.posX[0]++;
-      snake.pdirection=snake.direction;
-    } else {
-      snake.direction=snake.pdirection;
-      newTurn();
-    }
+      snake.pdirection=snake.direction;}
     break;
   case 2:
-    if (snake.posY[0]==0&&snake.pdirection!=2) {
+    if (snake.pdirection==3) {
       snake.direction=snake.pdirection;
       newTurn();
-    }
-    if (!(snake.posY[0]-1==snake.posY[1])) {
+    }else{
       moveSnake();
       snake.posY[0]--;
-      snake.pdirection=snake.direction;
-    } else {
-      snake.direction=snake.pdirection;
-      newTurn();
-    }
+      snake.pdirection=snake.direction;}
     break;
   case 3:
-    if (snake.posY[0]==(boardSizeY-1)&&snake.pdirection!=3) {
+   if (snake.pdirection==2) {
       snake.direction=snake.pdirection;
       newTurn();
-    }
-
-    if (!(snake.posY[0]+1==snake.posY[1])) {
+    }else{
       moveSnake();
       snake.posY[0]++;
-      snake.pdirection=snake.direction;
-    } else {
-      snake.direction=snake.pdirection;
-      newTurn();
-    }
+      snake.pdirection=snake.direction;}
     break;
   default:break;
   }
@@ -188,6 +175,9 @@ void newTurn(){
             if (snake.size%5==0){
                 newFood(speedFood);
             }
+            if (snake.size%6==0){
+                newFood(slowFood);
+            }
         }
         if((snake.posX[0]==speedFood.posX)&&(snake.posY[0]==speedFood.posY)){
             Beep(800,200);
@@ -195,6 +185,13 @@ void newTurn(){
             difficultyLevel/=2;
             speedFood.posX=boardSizeX+1;
             speedFood.posY=boardSizeY+1;
+        }
+        if((snake.posX[0]==slowFood.posX)&&(snake.posY[0]==slowFood.posY)){
+            Beep(1319,200);
+            Beep(800,200);
+            difficultyLevel*=2;
+            slowFood.posX=boardSizeX+1;
+            slowFood.posY=boardSizeY;
         }
 }
 
@@ -211,44 +208,45 @@ void showBoard(){
     int i,j;
     initaliseBoard();
     for(i=0;i<snake.size;i++){
-       gameBoard[snake.posX[i]][snake.posY[i]]='0';}
+       gameBoard[snake.posX[i]][snake.posY[i]]='#';}
     gameBoard[food.posX][food.posY]='*';
-    gameBoard[speedFood.posX][speedFood.posY]='$';
+    gameBoard[speedFood.posX][speedFood.posY]='+';
+    gameBoard[slowFood.posX][slowFood.posY]='$';
     clearScreen();
-    for(i=0;i<boardSizeY+15;i++){cout<<'_';}cout<<endl<<'|';
+    for(i=0;i<boardSizeY+15;i++){cout<<'_';}cout<<'\n'<<'|';
     for(j=0;j<boardSizeY;j++){cout<<gameBoard[0][j];}cout<<'|'<<" Scor curent "<<"\n|";
     for(j=0;j<boardSizeY;j++){cout<<gameBoard[1][j];}cout<<'|'<<"       "<<snake.size-3<<"\n|";
-    for(j=0;j<boardSizeY;j++){cout<<gameBoard[2][j];}cout<<'|';for(i=1;i<14;i++){cout<<'T';}cout<<endl;
+    for(j=0;j<boardSizeY;j++){cout<<gameBoard[2][j];}cout<<'|';for(i=1;i<14;i++){cout<<'T';}cout<<'\n';
     for(i=3;i<boardSizeX;i++){cout<<'|';
     for(j=0;j<boardSizeY;j++){
     cout<<gameBoard[i][j];}
-    cout<<'|'<<endl;}
-    for(i=0;i<boardSizeY+2;i++){cout<<'T';}cout<<endl;
+    cout<<'|'<<'\n';}
+    for(i=0;i<boardSizeY+2;i++){cout<<'T';}cout<<'\n';
     }
 
 void startGame(){
-    cout<<"  ____              _        "<<endl;
-    cout<<" / ___| _ __   __ _| | _____ "<<endl;
-    cout<<" `___ `| '_ ` / _` | |/ / _ `"<<endl;
-    cout<<"  ___) | | | | (_| |   <  __/"<<endl;
-    cout<<" |____/|_| |_|`__,_|_|`_`___|"<<endl<<endl;
-    cout<<"Programat in 2015 de Lucian-Jan Filimon"<<endl<<endl;
+    cout<<"  ____              _        "<<'\n';
+    cout<<" / ___| _ __   __ _| | _____ "<<'\n';
+    cout<<" `___ `| '_ ` / _` | |/ / _ `"<<'\n';
+    cout<<"  ___) | | | | (_| |   <  __/"<<'\n';
+    cout<<" |____/|_| |_|`__,_|_|`_`___|"<<'\n'<<'\n';
+    cout<<"Programat in 2016 de Lucian-Jan Filimon"<<'\n'<<'\n';
     cout<<"Scrie un nivel de dificultate intre 1 si 3(1-greu,3-usor):";
     cin>>difficultyLevel;
     while(difficultyLevel>3||difficultyLevel<1){
-        cout<<"Nivelul de dificultate trebuie sa fie intre 1 si 3!"<<endl<<"Introdu din nou:";
+        cout<<"Nivelul de dificultate trebuie sa fie intre 1 si 3!"<<'\n'<<"Introdu din nou:";
         cin>>difficultyLevel;
         }
 }
 
 void gameOver(){
     clearScreen();
-    cout<<"     _    _         _              _       _   _ "<<endl;
-    cout<<"    / `  (_)  _ __ (_) ___ _ __ __| |_   _| |_| |"<<endl;
-    cout<<"   / _ ` | | | '_ `| |/ _ ` '__/ _` | | | | __| |"<<endl;
-    cout<<"  / ___ `| | | |_) | |  __/ | | (_| | |_| | |_|_|"<<endl;
-    cout<<" /_/   `_`_| | .__/|_|`___|_|  `__,_|`__,_|`__(_)"<<endl;
-    cout<<"             |_|                                 "<<endl<<endl;
+    cout<<"     _    _         _              _       _   _ "<<'\n';
+    cout<<"    / `  (_)  _ __ (_) ___ _ __ __| |_   _| |_| |"<<'\n';
+    cout<<"   / _ ` | | | '_ `| |/ _ ` '__/ _` | | | | __| |"<<'\n';
+    cout<<"  / ___ `| | | |_) | |  __/ | | (_| | |_| | |_|_|"<<'\n';
+    cout<<" /_/   `_`_| | .__/|_|`___|_|  `__,_|`__,_|`__(_)"<<'\n';
+    cout<<"             |_|                                 "<<'\n'<<'\n';
     cout<<"Ai terminat cu scorul "<<snake.size-3<<"!";
     Sleep(5000);
 }
@@ -278,6 +276,8 @@ int main()
     newFood(food);
     speedFood.posX=boardSizeX+1;
     speedFood.posY=boardSizeY+1;
+    slowFood.posX=boardSizeX+1;
+    slowFood.posY=boardSizeY;
     game();
     return 0;
 }
